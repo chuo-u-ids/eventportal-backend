@@ -1,0 +1,52 @@
+name: AWS Lambda Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+
+      - name: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-region: 'ap-northeast-1'
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_NAME_DEV }}
+          role-session-name: GitHubActions
+
+      - name: get-caller-identity is allowed to run on role.
+        run: aws sts get-caller-identity
+
+      - name: SAM build
+        run: sam build --use-container
+      - name: SAM deploy
+        id: lambda_update
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+
+      - name: Generate release tag
+        if: steps.lambda_update.outcome == 'success'
+        id: release_tag
+        run: |
+          VERSION=$(date +'%Y.%m.%d.%H%M')
+          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+        env:
+          TZ: 'Asia/Tokyo'
+
+      - uses: release-drafter/release-drafter@v5
+        if: steps.lambda_update.outcome == 'success'
+        with:
+          tag: ${{ steps.release_tag.outputs.VERSION }}
+          name: ${{ steps.release_tag.outputs.VERSION }}
+          version: ${{ steps.release_tag.outputs.VERSION }}
+          publish: true
+          commitish: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
