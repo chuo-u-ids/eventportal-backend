@@ -19,7 +19,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@master
         with:
           aws-region: 'ap-northeast-1'
-          role-to-assume: ${{ env.AWS_IAM_ARN_DEV }}
+          role-to-assume: ${{ secrets.AWS_IAM_ARN_DEV }}
           role-session-name: GitHubActions
 
       - name: get-caller-identity is allowed to run on role.
@@ -29,7 +29,7 @@ jobs:
         run: sam build --use-container
       - name: SAM deploy
         id: lambda_update
-        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ${{ secrets.AWS_STACK_NAME_DEV }} --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=Env,ParameterValue=dev
 
       - name: Generate release tag
         if: steps.lambda_update.outcome == 'success'
