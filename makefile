@@ -9,3 +9,6 @@ lint:
 format:
 	isort ./**/*.py
 	black ./**/*.py
+
+sam_local:
+	sam local start-lambda | sam local start-api
