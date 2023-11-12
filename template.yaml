@@ -6,10 +6,10 @@ Globals:
     Timeout: 3
     MemorySize: 128
 Resources:
-  EventportalPostSpeakerRole:
+  EventportalLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: EventportalPostSpeakerRole
+      RoleName: EventportalLambdaRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -20,7 +20,7 @@ Resources:
           Action:
           - sts:AssumeRole
       Policies:
-      - PolicyName: EventportalPostSpeakerPolicy
+      - PolicyName: EventportalLambdaPolicy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -29,39 +29,14 @@ Resources:
             - dynamodb:PutItem
             - dynamodb:Query
             - dynamodb:Scan
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            Resource:
-            - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DynamoDbProposalTable'
-  EventportalGetSpeakersRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: EventportalGetSpeakersRole
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Policies:
-      - PolicyName: EventportalGetSpeakersPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
             - dynamodb:GetItem
-            - dynamodb:Scan
-            - dynamodb:Query
             - logs:CreateLogGroup
             - logs:CreateLogStream
             - logs:PutLogEvents
             Resource:
             - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DynamoDbProposalTable'
+            - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DynamoDbAccountTable'
+            - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
   EventPortalWorkingTest:
     Type: AWS::Serverless::Function
     Properties:
@@ -81,7 +56,7 @@ Resources:
   EventportalPostSpeaker:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/AddingProposal/
+      CodeUri: lambda/proposal/AddingProposal/
       Handler: app.lambda_handler
       Runtime: python3.11
       Architectures:
@@ -94,14 +69,14 @@ Resources:
             Method: post
       Role:
         Fn::GetAtt:
-        - EventportalPostSpeakerRole
+        - EventportalLambdaRole
         - Arn
     Metadata:
       SamResourceId: EventportalPostSpeaker
   EventportalGetSpeakers:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/GetProposal/
+      CodeUri: lambda/proposal/GetProposal/
       Handler: app.lambda_handler
       Runtime: python3.11
       Architectures:
@@ -114,14 +89,14 @@ Resources:
             Method: get
       Role:
         Fn::GetAtt:
-        - EventportalGetSpeakersRole
+        - EventportalLambdaRole
         - Arn
     Metadata:
       SamResourceId: EventportalGetSpeakers
   EventportalGetAllSpeakers:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/GetAllProposal/
+      CodeUri: lambda/proposal/GetAllProposal/
       Handler: app.lambda_handler
       Runtime: python3.11
       Architectures:
@@ -134,10 +109,70 @@ Resources:
             Method: get
       Role:
         Fn::GetAtt:
-        - EventportalGetSpeakersRole
+        - EventportalLambdaRole
         - Arn
     Metadata:
       SamResourceId: EventportalGetSpeakers
+  AuthenticationAddUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/authentication/AddUserInfo/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+      - x86_64
+      Events:
+        AddUser:
+          Type: Api
+          Properties:
+            Path: /add_user
+            Method: post
+      Role:
+        Fn::GetAtt:
+        - EventportalLambdaRole
+        - Arn
+    Metadata:
+      SamResourceId: AuthenticationAddUser
+  AuthenticationCheckUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/authentication/CheckUserInfo/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+      - x86_64
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /check_user
+            Method: get
+      Role:
+        Fn::GetAtt:
+        - EventportalLambdaRole
+        - Arn
+    Metadata:
+      SamResourceId: AuthenticationCheckUser
+  AuthenticationUpdateUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/authentication/UpdateUserInfo/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+      - x86_64
+      Events:
+        UpdateUser:
+          Type: Api
+          Properties:
+            Path: /update_user
+            Method: post
+      Role:
+        Fn::GetAtt:
+        - EventportalLambdaRole
+        - Arn
+    Metadata:
+      SamResourceId: AuthenticationUpdateUser
 
   DynamoDbProposalTable:
     Type: AWS::Serverless::SimpleTable
@@ -149,6 +184,17 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
+  DynamoDbAccountTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: uid
+        Type: String
+      TableName: "DynamoDbAccountTable"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
 Outputs:
   EventportalBackendWorkingApi:
     Description: API Gateway endpoint URL for Prod stage for check working
@@ -184,22 +230,9 @@ Outputs:
       Fn::GetAtt:
       - EventportalGetSpeakers
       - Arn
-
-  EventPortalWorkingTestIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value:
-      Fn::GetAtt:
-      - EventPortalWorkingTestRole
-      - Arn
-  EventportalPostSpeakerIamRole:
+  EventportalLambdaIamRole:
     Description: Implicit IAM Role created for post proposal function
     Value:
       Fn::GetAtt:
-      - EventportalPostSpeakerRole
-      - Arn
-  EventportalGetSpeakersIamRole:
-    Description: Implicit IAM Role created for get proposal function
-    Value:
-      Fn::GetAtt:
-      - EventportalGetSpeakersRole
+      - EventportalLambdaRole
       - Arn

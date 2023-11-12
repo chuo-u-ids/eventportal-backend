@@ -19,7 +19,22 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-      - uses: aws-actions/setup-sam@v2
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+      - name: generate firebase.json
+        run: |
+          python3 -m pip install -r requirements.txt
+          python3 create_firebase_json.py
+        env:
+          firebase_private_key_id: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+          firebase_private_key: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          firebase_client_email: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          firebase_client_id: ${{ secrets.FIREBASE_CLIENT_ID }}
+          firebase_client_x509_cert_url: ${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
+      - name: Setup SAM
+        uses: aws-actions/setup-sam@v2
 
       - name: configure-aws-credentials
         uses: aws-actions/configure-aws-credentials@master

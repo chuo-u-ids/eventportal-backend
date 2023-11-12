@@ -15,6 +15,8 @@ tags:
     description: 'APIの動作確認用のエンドポイントです。'
   - name: proposal
     description: '発表申し込み関連のエンドポイントです。'
+  - name: account
+    description: 'アカウント関連のエンドポイントです。'
 paths:
   /api_work_test:
     get:
@@ -178,6 +180,113 @@ paths:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
       security:
         - FirebaseAuthToken: []
+  /add_user:
+    post:
+      description: "ユーザーを追加するエンドポイントです。"
+      operationId: 'add_user'
+      tags: ['account']
+      requestBody:
+        description: 'ユーザーの情報'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAdd'
+      responses:
+        '200':
+          description: '200 response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCheckReturn'
+        '400':
+          description: 'リクエストエラー（項目不足など）'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+        '403':
+          description: 'この発表の閲覧ができないユーザーです'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+      x-amazon-apigateway-integration:
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+      security:
+        - FirebaseAuthToken: []
+  /check_user:
+    get:
+      description: "ユーザーを確認するエンドポイントです。"
+      operationId: 'check_user'
+      tags: ['account']
+      responses:
+        '200':
+          description: '200 response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCheckReturn'
+        '400':
+          description: 'リクエストエラー（項目不足など）'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+        '403':
+          description: 'この発表の閲覧ができないユーザーです'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+      x-amazon-apigateway-integration:
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+      security:
+        - FirebaseAuthToken: []
+  /update_user:
+    put:
+      description: "ユーザーを更新するエンドポイントです。"
+      operationId: 'update_user'
+      tags: ['account']
+      requestBody:
+        description: 'ユーザーの情報'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAdd'
+      responses:
+        '200':
+          description: '200 response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCheckReturn'
+        '400':
+          description: 'リクエストエラー（項目不足など）'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+        '403':
+          description: 'この発表の閲覧ができないユーザーです'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+      x-amazon-apigateway-integration:
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+      security:
+        - FirebaseAuthToken: []
 
 components:
   schemas:
@@ -290,8 +399,6 @@ components:
                   name:
                     type: string
                     description: '名前'
-              items:
-                type: string
             abstract:
               type: string
               description: '発表概要'
@@ -362,6 +469,46 @@ components:
           type: string
           description: 'エラーメッセージ'
       additionalProperties: false
+    UserAdd:
+      title: UserAdd Schema
+      type: object
+      properties:
+        name:
+          type: string
+          description: '名前'
+        affiliation:
+          type: string
+          description: '所属'
+        department:
+          type: string
+          description: '学部学科'
+      additionalProperties: false
+    UserCheckReturn:
+      title: UserCheck Return Schema
+      type: object
+      properties:
+        status:
+          type: string
+          description: '操作のステータス'
+        data:
+          type: object
+          description: 'ユーザーの情報'
+          properties:
+            uid: 
+              type: string
+              description: 'ユーザーID'
+            name:
+              type: string
+              description: '名前'
+            email:
+              type: string
+              description: 'メールアドレス'
+            affiliation:
+              type: string
+              description: '所属'
+            department:
+              type: string
+              description: '学部学科'
   securitySchemes:
     FirebaseAuthToken:
       type: apiKey
