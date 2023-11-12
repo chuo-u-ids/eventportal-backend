@@ -13,4 +13,17 @@ def lambda_handler(event, context):
     data['id'] = uuid4().hex
     proposal = Proposal(data)
     proposalDb = ProposalDb(resource('dynamodb', region_name='ap-northeast-1'))
-    return proposalDb.put(proposal)
+    return {
+        "statusCode": 200,
+        "body": json.dumps(
+            {
+                "status": "ok",
+                "item": proposalDb.put(proposal),
+            }
+        ),
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+        },
+    }

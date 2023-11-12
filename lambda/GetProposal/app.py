@@ -20,6 +20,11 @@ def lambda_handler(event, context):
                     "item": proposalDb.get(id).to_dict()
                 }
             ),
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+            },
         }
     except:
         return {
@@ -29,4 +34,9 @@ def lambda_handler(event, context):
                     "status": "not found",
                 }
             ),
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+            }
         }

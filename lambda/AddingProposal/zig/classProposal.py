@@ -53,26 +53,16 @@ class ProposalDb:
         try:
             if self.get_by_title_and_type(proposal.title, proposal.presentationType) is not None:
                 return {
-                    "statusCode": 400,
-                    "body": json.dumps(
-                        {
-                            "status": "ng",
-                            "message": "The combination of title and presentationType must be unique",
-                        }
-                    ),
+                    "status": "ng",
+                    "message": "The combination of title and presentationType must be unique",
                 }
             self.table.put_item(Item=proposal.to_dict_for_post())
             return {
-                "statusCode": 200,
-                "body": json.dumps(
-                    {
-                        "status": "ok",
-                        "presentationType": proposal.presentationType,
-                        "id": proposal.id,
-                        "title": proposal.title,
-                        "speakers": proposal.speakers,
-                    }
-                ),
+                "status": "ok",
+                "presentationType": proposal.presentationType,
+                "id": proposal.id,
+                "title": proposal.title,
+                "speakers": proposal.speakers,
             }
         except Exception as e:
             print(e)
