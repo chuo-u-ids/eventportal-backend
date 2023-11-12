@@ -47,7 +47,7 @@ class Proposal:
 class ProposalDb:
     def __init__(self, dyn_resource):
         self.dyn_resource = dyn_resource
-        self.table = dyn_resource.Table('DynamoDbPresentationTable')
+        self.table = dyn_resource.Table('DynamoDbProposalTable')
 
     def put(self, proposal):
         try:

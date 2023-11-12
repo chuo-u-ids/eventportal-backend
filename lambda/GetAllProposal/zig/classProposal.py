@@ -10,6 +10,7 @@ class Proposal:
         self.estimated_time = json['estimated_time']
         self.seminar = json['seminar']
         self.speakers = json['speakers']
+        self.applicants = json['applicants']
 
     def to_dict_for_post(self):
         return {
@@ -19,7 +20,8 @@ class Proposal:
             'abstract': self.abstract,
             'estimated_time': self.estimated_time,
             'seminar': self.seminar,
-            'speakers': self.speakers
+            'speakers': self.speakers,
+            'applicants': self.applicants
         }
     
 
@@ -31,7 +33,8 @@ class Proposal:
             'abstract': self.abstract,
             'estimated_time': int(self.estimated_time),
             'seminar': self.seminar,
-            'speakers': self.speakers
+            'speakers': self.speakers,
+            'applicants': self.applicants
         }
     
     def to_json(self):
@@ -47,7 +50,7 @@ class Proposal:
 class ProposalDb:
     def __init__(self, dyn_resource):
         self.dyn_resource = dyn_resource
-        self.table = dyn_resource.Table('DynamoDbPresentationTable')
+        self.table = dyn_resource.Table('DynamoDbProposalTable')
 
     def put(self, proposal):
         try:
@@ -63,6 +66,7 @@ class ProposalDb:
                 "id": proposal.id,
                 "title": proposal.title,
                 "speakers": proposal.speakers,
+                "applicants": proposal.applicants
             }
         except Exception as e:
             print(e)
@@ -109,15 +113,16 @@ class ProposalDb:
         }
 
     def update(self, proposal):
-        self.table.update_item(Key={'title': proposal.title}, UpdateExpression='SET presentationType = :presentationType, abstract = :abstract, estimated_time = :estimated_time, seminar = :seminar, speakers = :speakers', ExpressionAttributeValues={':presentationType': proposal.presentationType, ':abstract': proposal.abstract, ':estimated_time': proposal.estimated_time, ':seminar': proposal.seminar, ':speakers': proposal.speakers})
+        self.table.update_item(Key={'id': proposal.id}, UpdateExpression='SET title = :title, abstract = :abstract, estimated_time = :estimated_time, seminar = :seminar, speakers = :speakers, applicants = :applicants', ExpressionAttributeValues={':title': proposal.title, ':abstract': proposal.abstract, ':estimated_time': proposal.estimated_time, ':seminar': proposal.seminar, ':speakers': proposal.speakers, ':applicants': proposal.applicants})
         return {
-            "status": "ok",
+            "status": "updated",
+            "id": proposal.id,
             "title": proposal.title,
-            "presentationType": proposal.presentationType,
             "abstract": proposal.abstract,
             "estimated_time": proposal.estimated_time,
             "seminar": proposal.seminar,
             "speakers": proposal.speakers,
+            "applicants": proposal.applicants
         }
 
     def scan(self):
@@ -158,6 +163,12 @@ class ProposalDb:
     
     def query_by_speaker_and_type(self, speaker, presentationType):
         response = self.table.scan(FilterExpression='contains(speakers, :speaker) and presentationType = :presentationType', ExpressionAttributeValues={':speaker': speaker, ':presentationType': presentationType})
+        if 'Items' not in response:
+            return []
+        return [Proposal(item) for item in response['Items']]
+    
+    def query_by_applicant(self, applicant):
+        response = self.table.scan(FilterExpression='contains(applicants, :applicant)', ExpressionAttributeValues={':applicant': applicant})
         if 'Items' not in response:
             return []
         return [Proposal(item) for item in response['Items']]

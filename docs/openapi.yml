@@ -119,7 +119,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventSpeechProposalReturn'
+                $ref: '#/components/schemas/EventSpeechProposalAllReturn'
         '400':
           description: 'リクエストエラー（項目不足など）'
           content:
@@ -209,9 +209,17 @@ components:
           description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
         speakers:
           type: array
-          description: '登壇者のeメールアドレス(代表者含む)の配列'
+          description: '登壇者情報'
           items:
-            type: string
+            type: object
+            description: '登壇者のeメールアドレス(代表者含む)の配列'
+            properties:
+              email:
+                type: string
+                description: 'eメールアドレス'
+              name:
+                type: string
+                description: '名前'
       additionalProperties: false
     EventSpeechProposalUpdate:
       title: EventSpeechProposalUpdate Schema
@@ -237,9 +245,17 @@ components:
           description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
         speakers:
           type: array
-          description: '登壇者のeメールアドレス(代表者含む)の配列'
+          description: '登壇者情報'
           items:
-            type: string
+            type: object
+            description: '登壇者のeメールアドレス(代表者含む)の配列'
+            properties:
+              email:
+                type: string
+                description: 'eメールアドレス'
+              name:
+                type: string
+                description: '名前'
       additionalProperties: false
     EventSpeechProposalReturn:
       title: EventSpeechProposalError Schema
@@ -263,7 +279,17 @@ components:
               description: '発表タイトル'
             speakers:
               type: array
-              description: '登壇者のeメールアドレス(代表者含む)の配列'
+              description: '登壇者情報'
+              items:
+                type: object
+                description: '登壇者のeメールアドレス(代表者含む)の配列'
+                properties:
+                  email:
+                    type: string
+                    description: 'eメールアドレス'
+                  name:
+                    type: string
+                    description: '名前'
               items:
                 type: string
             abstract:
@@ -275,6 +301,52 @@ components:
             seminar:
               type: string
               description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
+    EventSpeechProposalAllReturn:
+      title: EventSpeechProposalError Schema
+      type: object
+      properties:
+        status:
+          type: string
+          description: '申し込みのステータス'
+        item:
+          type: array
+          description: '申し込みの内容'
+          items:
+            type: object
+            description: '申し込みの内容'
+            properties:
+              Id:
+                type: string
+                description: '申し込みのID'
+              presentationType:
+                type: string
+                description: '発表形式。presentationまたはposter'
+              title:
+                type: string
+                description: '発表タイトル'
+              speakers:
+                type: array
+                description: '登壇者情報'
+                items:
+                  type: object
+                  description: '登壇者のeメールアドレス(代表者含む)の配列'
+                  properties:
+                    email:
+                      type: string
+                      description: 'eメールアドレス'
+                    name:
+                      type: string
+                      description: '名前'
+              abstract:
+                type: string
+                description: '発表概要'
+              estimated_time:
+                type: integer
+                description: '発表時間(分)'
+              seminar:
+                type: string
+                description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
+
       additionalProperties: false
     EventSpeechProposalErrorReturn:
       title: EventSpeechProposalErrorReturn Schema
