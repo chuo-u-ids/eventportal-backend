@@ -77,3 +77,41 @@ Outputs:
     Description: API Gateway endpoint URL for Prod stage for post proposal
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/adding_proposal/
+
+  EventPortalWorkingTest:
+    Description: Lambda Function ARN for check working
+    Value:
+      Fn::GetAtt:
+      - EventPortalWorkingTest
+      - Arn
+  EventportalPostSpeaker:
+    Description: Lambda Function ARN for post proposal
+    Value:
+      Fn::GetAtt:
+      - EventportalPostSpeaker
+      - Arn
+  EventportalGetSpeakers:
+    Description: Lambda Function ARN for get proposal
+    Value:
+      Fn::GetAtt:
+      - EventportalGetSpeakers
+      - Arn
+
+  EventPortalWorkingTestIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value:
+      Fn::GetAtt:
+      - EventPortalWorkingTestRole
+      - Arn
+  EventportalPostSpeakerIamRole:
+    Description: Implicit IAM Role created for post proposal function
+    Value:
+      Fn::GetAtt:
+      - EventportalPostSpeakerRole
+      - Arn
+  EventportalGetSpeakersIamRole:
+    Description: Implicit IAM Role created for get proposal function
+    Value:
+      Fn::GetAtt:
+      - EventportalGetSpeakersRole
+      - Arn
