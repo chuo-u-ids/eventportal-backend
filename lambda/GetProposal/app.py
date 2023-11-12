@@ -18,7 +18,7 @@ def lambda_handler(event, context):
             "body": json.dumps(
                 {
                     "status": "ok",
-                    "item": proposalDb.get(id).to_dict()
+                    "item": proposalDb.get(id)[0].to_dict()
                 }
             ),
             "headers": {

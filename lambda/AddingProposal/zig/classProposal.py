@@ -80,7 +80,7 @@ class ProposalDb:
         response = self.table.get_item(Key={'id': id})
         if 'Item' not in response:
             return None
-        return [Proposal(item) for item in response['Items']]
+        return [Proposal(response['Item'])]
     
     def getall(self):
         # レコード全件吐き出し
@@ -165,4 +165,4 @@ class ProposalDb:
 if __name__ == '__main__':
     dynamodb = resource('dynamodb')
     db = ProposalDb(dynamodb)
-    db.get('iDS成果報告会を支える技術')
+    print(db.getall())
