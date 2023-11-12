@@ -51,16 +51,6 @@ class ProposalDb:
 
     def put(self, proposal):
         try:
-            if self.get_by_title_and_type(proposal.title, proposal.presentationType) is not None:
-                return {
-                    "statusCode": 400,
-                    "body": json.dumps(
-                        {
-                            "status": "ng",
-                            "message": "The combination of title and presentationType must be unique",
-                        }
-                    ),
-                }
             self.table.put_item(Item=proposal.to_dict_for_post())
             return {
                 "statusCode": 200,
@@ -94,9 +84,9 @@ class ProposalDb:
     
     def get_by_title_and_type(self, title, presentationType):
         response = self.table.scan(FilterExpression='title = :title and presentationType = :presentationType', ExpressionAttributeValues={':title': title, ':presentationType': presentationType})
-        if response['Items'] == []:
+        if 'Items' not in response:
             return None
-        return Proposal(response['Items'][0])
+        return Proposal(response['Items'])
     
     def get_by_title(self, title):
         response = self.table.scan(FilterExpression='title = :title', ExpressionAttributeValues={':title': title})

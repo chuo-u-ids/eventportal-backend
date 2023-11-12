@@ -42,46 +42,38 @@ Resources:
             Method: post
     Metadata:
       SamResourceId: EventportalPostSpeaker
-  DynamoDbSpeechTable:
+  EventportalGetSpeakers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/GetProposal/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+      - x86_64
+      Events:
+        AddProposal:
+          Type: Api
+          Properties:
+            Path: /check_proposal/{id}
+            Method: get
+    Metadata:
+      SamResourceId: EventportalGetSpeakers
+  DynamoDbPresentationTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
         Name: id
         Type: String
-      TableName: "DynamoDbSpeechTable"
+      TableName: "DynamoDbPresentationTable"
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 Outputs:
   EventportalBackendWorkingApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Description: API Gateway endpoint URL for Prod stage for check working
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api_work_test/
-  EventportalPostProposalApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
+  EventportalPostSpeakerApi:
+    Description: API Gateway endpoint URL for Prod stage for post proposal
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/adding_proposal/
-  EventPortalWorkingTest:
-    Description: Hello World Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - EventPortalWorkingTest
-      - Arn
-  EventPortalWorkingTestIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value:
-      Fn::GetAtt:
-      - EventPortalWorkingTestRole
-      - Arn
-  EventportalPostSpeaker:
-    Description: Hello World Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - EventportalPostSpeaker
-      - Arn
-  EventportalPostSpeakerIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value:
-      Fn::GetAtt:
-      - EventportalPostSpeakerRole
-      - Arn
