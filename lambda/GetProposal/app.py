@@ -1,12 +1,9 @@
 import json
-from firebase_admin import credentials, initialize_app
-from dotenv import load_dotenv
 from boto3 import resource, client
 from zig.classProposal import Proposal, ProposalDb
 from uuid import uuid4
 import os
 
-load_dotenv()
 
 
 def lambda_handler(event, context):
@@ -18,7 +15,7 @@ def lambda_handler(event, context):
             "body": json.dumps(
                 {
                     "status": "ok",
-                    "item": proposalDb.get(id)[0].to_dict()
+                    "item": proposalDb.get(id).to_dict()
                 }
             ),
             "headers": {
@@ -27,12 +24,13 @@ def lambda_handler(event, context):
                 "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
             },
         }
-    except:
+    except Exception as e:
         return {
             "statusCode": 404,
             "body": json.dumps(
                 {
                     "status": "not found",
+                    "message": str(e),
                 }
             ),
             "headers": {

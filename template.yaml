@@ -162,6 +162,10 @@ Outputs:
     Description: API Gateway endpoint URL for Prod stage for get proposal
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/check_proposal/{id}/
+  EventportalGetAllSpeakersApi:
+    Description: API Gateway endpoint URL for Prod stage for get all proposal
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/check_proposal_all/
   EventPortalWorkingTest:
     Description: Lambda Function ARN for check working
     Value:
