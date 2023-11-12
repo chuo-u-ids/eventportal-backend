@@ -6,10 +6,10 @@ info:
     email: mizphses@gmail.com
   version: 1.0.0
 servers:
-  - url: 'http://localhost:3000'
-    description: 'Local server'
   - url: 'https://mo7jqe46o9.execute-api.ap-northeast-1.amazonaws.com/Prod'
     description: 'Production server'
+  - url: 'http://localhost:3000'
+    description: 'Local server'
 tags:
   - name: test
     description: 'APIの動作確認用のエンドポイントです。'
@@ -108,6 +108,38 @@ paths:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
       security:
         - FirebaseAuthToken: []
+  /check_proposal_all:
+    get:
+      description: "発表申し込みの内容すべてを取得するエンドポイント。"
+      operationId: 'check_all_proposal'
+      tags: ['proposal']
+      responses:
+        '200':
+          description: '200 response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalReturn'
+        '400':
+          description: 'リクエストエラー（項目不足など）'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+        '403':
+          description: 'この発表の閲覧ができないユーザーです'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+      x-amazon-apigateway-integration:
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+      security:
+        - FirebaseAuthToken: []
+
   /check_proposal/{Id}:
     get:
       description: "発表申し込みの内容を確認するエンドポイントです。"
@@ -216,20 +248,33 @@ components:
         status:
           type: string
           description: '申し込みのステータス'
-        Id:
-          type: string
-          description: '申し込みのID'
-        presentationType:
-          type: string
-          description: '発表形式。presentationまたはposter'
-        title:
-          type: string
-          description: '発表タイトル'
-        speakers:
-          type: array
-          description: '登壇者のeメールアドレス(代表者含む)の配列'
-          items:
-            type: string
+        item:
+          type: object
+          description: '申し込みの内容'
+          properties:
+            Id:
+              type: string
+              description: '申し込みのID'
+            presentationType:
+              type: string
+              description: '発表形式。presentationまたはposter'
+            title:
+              type: string
+              description: '発表タイトル'
+            speakers:
+              type: array
+              description: '登壇者のeメールアドレス(代表者含む)の配列'
+              items:
+                type: string
+            abstract:
+              type: string
+              description: '発表概要'
+            estimated_time:
+              type: integer
+              description: '発表時間(分)'
+            seminar:
+              type: string
+              description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
       additionalProperties: false
     EventSpeechProposalErrorReturn:
       title: EventSpeechProposalErrorReturn Schema

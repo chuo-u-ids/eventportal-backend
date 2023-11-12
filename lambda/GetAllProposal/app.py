@@ -3,14 +3,9 @@ from firebase_admin import credentials, initialize_app
 from dotenv import load_dotenv
 from boto3 import resource, client
 from zig.classProposal import Proposal, ProposalDb
-from uuid import uuid4
-import os
-
-load_dotenv()
 
 
 def lambda_handler(event, context):
-    id = event['pathParameters']['id']
     proposalDb = ProposalDb(resource('dynamodb', region_name='ap-northeast-1'))
     try:
         return {
@@ -18,7 +13,7 @@ def lambda_handler(event, context):
             "body": json.dumps(
                 {
                     "status": "ok",
-                    "item": proposalDb.get(id).to_dict()
+                    "item": [proposal.to_dict() for proposal in proposalDb.getall()]
                 }
             ),
             "headers": {

@@ -118,6 +118,27 @@ Resources:
         - Arn
     Metadata:
       SamResourceId: EventportalGetSpeakers
+  EventportalGetAllSpeakers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/GetAllProposal/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+      - x86_64
+      Events:
+        AddProposal:
+          Type: Api
+          Properties:
+            Path: /check_proposal_all
+            Method: get
+      Role:
+        Fn::GetAtt:
+        - EventportalGetSpeakersRole
+        - Arn
+    Metadata:
+      SamResourceId: EventportalGetSpeakers
+
   DynamoDbPresentationTable:
     Type: AWS::Serverless::SimpleTable
     Properties:

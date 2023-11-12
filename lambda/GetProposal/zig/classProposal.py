@@ -51,18 +51,18 @@ class ProposalDb:
 
     def put(self, proposal):
         try:
+            if self.get_by_title_and_type(proposal.title, proposal.presentationType) is not None:
+                return {
+                    "status": "ng",
+                    "message": "The combination of title and presentationType must be unique",
+                }
             self.table.put_item(Item=proposal.to_dict_for_post())
             return {
-                "statusCode": 200,
-                "body": json.dumps(
-                    {
-                        "status": "ok",
-                        "presentationType": proposal.presentationType,
-                        "id": proposal.id,
-                        "title": proposal.title,
-                        "speakers": proposal.speakers,
-                    }
-                ),
+                "status": "ok",
+                "presentationType": proposal.presentationType,
+                "id": proposal.id,
+                "title": proposal.title,
+                "speakers": proposal.speakers,
             }
         except Exception as e:
             print(e)
@@ -80,146 +80,87 @@ class ProposalDb:
         response = self.table.get_item(Key={'id': id})
         if 'Item' not in response:
             return None
-        return Proposal(response['Item'])
+        return [Proposal(item) for item in response['Items']]
+    
+    def getall(self):
+        # レコード全件吐き出し
+        response = self.table.scan()
+        if 'Items' not in response:
+            return []
+        return [Proposal(item) for item in response['Items']]
     
     def get_by_title_and_type(self, title, presentationType):
         response = self.table.scan(FilterExpression='title = :title and presentationType = :presentationType', ExpressionAttributeValues={':title': title, ':presentationType': presentationType})
-        if 'Items' not in response:
+        if response['Items'] == []:
             return None
-        return Proposal(response['Items'])
+        return [Proposal(item) for item in response['Items']]
     
     def get_by_title(self, title):
         response = self.table.scan(FilterExpression='title = :title', ExpressionAttributeValues={':title': title})
         if 'Items' not in response:
             return None
-        return Proposal(response['Items'])
+        return [Proposal(item) for item in response['Items']]
     
     def delete(self, title):
         self.table.delete_item(Key={'title': title})
         return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "title": title,
-                }
-            ),
+            "status": "deleted",
+            "title": title,
         }
 
     def update(self, proposal):
         self.table.update_item(Key={'title': proposal.title}, UpdateExpression='SET presentationType = :presentationType, abstract = :abstract, estimated_time = :estimated_time, seminar = :seminar, speakers = :speakers', ExpressionAttributeValues={':presentationType': proposal.presentationType, ':abstract': proposal.abstract, ':estimated_time': proposal.estimated_time, ':seminar': proposal.seminar, ':speakers': proposal.speakers})
         return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "title": proposal.title,
-                    "presentationType": proposal.presentationType,
-                    "abstract": proposal.abstract,
-                    "estimated_time": proposal.estimated_time,
-                    "seminar": proposal.seminar,
-                    "speakers": proposal.speakers,
-                }
-            ),
+            "status": "ok",
+            "title": proposal.title,
+            "presentationType": proposal.presentationType,
+            "abstract": proposal.abstract,
+            "estimated_time": proposal.estimated_time,
+            "seminar": proposal.seminar,
+            "speakers": proposal.speakers,
         }
 
     def scan(self):
         response = self.table.scan()
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
     
     def query(self, seminar):
         response = self.table.query(KeyConditionExpression='seminar = :seminar', ExpressionAttributeValues={':seminar': seminar})
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
     
     def query_by_speaker(self, speaker):
         response = self.table.scan(FilterExpression='contains(speakers, :speaker)', ExpressionAttributeValues={':speaker': speaker})
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
     
     def query_by_seminar(self, seminar):
         response = self.table.scan(FilterExpression='seminar = :seminar', ExpressionAttributeValues={':seminar': seminar})
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
     
     def query_by_speaker_and_seminar(self, speaker, seminar):
         response = self.table.scan(FilterExpression='contains(speakers, :speaker) and seminar = :seminar', ExpressionAttributeValues={':speaker': speaker, ':seminar': seminar})
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
     
     def query_by_speaker_and_seminar_and_type(self, speaker, seminar, presentationType):
         response = self.table.scan(FilterExpression='contains(speakers, :speaker) and seminar = :seminar and presentationType = :presentationType', ExpressionAttributeValues={':speaker': speaker, ':seminar': seminar, ':presentationType': presentationType})
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
     
     def query_by_speaker_and_type(self, speaker, presentationType):
         response = self.table.scan(FilterExpression='contains(speakers, :speaker) and presentationType = :presentationType', ExpressionAttributeValues={':speaker': speaker, ':presentationType': presentationType})
         if 'Items' not in response:
             return []
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "status": "ok",
-                    "items": [Proposal(item) for item in response['Items']],
-                }
-            ),
-        }
+        return [Proposal(item) for item in response['Items']]
 
 if __name__ == '__main__':
     dynamodb = resource('dynamodb')
