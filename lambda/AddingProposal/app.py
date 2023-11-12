@@ -1,7 +1,7 @@
 import json
 from firebase_admin import credentials, initialize_app
 from dotenv import load_dotenv
-from boto3 import resource
+from boto3 import resource, client
 from zig.classProposal import Proposal, ProposalDb
 from uuid import uuid4
 import os

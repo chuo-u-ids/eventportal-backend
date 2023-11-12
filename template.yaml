@@ -1,15 +1,67 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: 'eventportal-backend
-
-  Sample SAM Template for eventportal-backend
-
-  '
+Description: 'eventportal-backend SAM Template'
 Globals:
   Function:
     Timeout: 3
     MemorySize: 128
 Resources:
+  EventportalPostSpeakerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: EventportalPostSpeakerRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: EventportalPostSpeakerPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            - dynamodb:Query
+            - dynamodb:Scan
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource:
+            - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DynamoDbPresentationTable'
+  EventportalGetSpeakersRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: EventportalGetSpeakersRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: EventportalGetSpeakersPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource:
+            - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DynamoDbPresentationTable'
   EventPortalWorkingTest:
     Type: AWS::Serverless::Function
     Properties:
@@ -40,48 +92,89 @@ Resources:
           Properties:
             Path: /adding_proposal
             Method: post
+      Role:
+        Fn::GetAtt:
+        - EventportalPostSpeakerRole
+        - Arn
     Metadata:
       SamResourceId: EventportalPostSpeaker
-  DynamoDbSpeechTable:
+  EventportalGetSpeakers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/GetProposal/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+      - x86_64
+      Events:
+        AddProposal:
+          Type: Api
+          Properties:
+            Path: /check_proposal/{id}
+            Method: get
+      Role:
+        Fn::GetAtt:
+        - EventportalGetSpeakersRole
+        - Arn
+    Metadata:
+      SamResourceId: EventportalGetSpeakers
+  DynamoDbPresentationTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
         Name: id
         Type: String
-      TableName: "DynamoDbSpeechTable"
+      TableName: "DynamoDbPresentationTable"
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 Outputs:
   EventportalBackendWorkingApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Description: API Gateway endpoint URL for Prod stage for check working
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api_work_test/
-  EventportalPostProposalApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
+  EventportalPostSpeakerApi:
+    Description: API Gateway endpoint URL for Prod stage for post proposal
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/adding_proposal/
+  EventportalGetSpeakersApi:
+    Description: API Gateway endpoint URL for Prod stage for get proposal
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/check_proposal/{id}/
   EventPortalWorkingTest:
-    Description: Hello World Lambda Function ARN
+    Description: Lambda Function ARN for check working
     Value:
       Fn::GetAtt:
       - EventPortalWorkingTest
       - Arn
+  EventportalPostSpeaker:
+    Description: Lambda Function ARN for post proposal
+    Value:
+      Fn::GetAtt:
+      - EventportalPostSpeaker
+      - Arn
+  EventportalGetSpeakers:
+    Description: Lambda Function ARN for get proposal
+    Value:
+      Fn::GetAtt:
+      - EventportalGetSpeakers
+      - Arn
+
   EventPortalWorkingTestIamRole:
     Description: Implicit IAM Role created for Hello World function
     Value:
       Fn::GetAtt:
       - EventPortalWorkingTestRole
       - Arn
-  EventportalPostSpeaker:
-    Description: Hello World Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - EventportalPostSpeaker
-      - Arn
   EventportalPostSpeakerIamRole:
-    Description: Implicit IAM Role created for Hello World function
+    Description: Implicit IAM Role created for post proposal function
     Value:
       Fn::GetAtt:
       - EventportalPostSpeakerRole
+      - Arn
+  EventportalGetSpeakersIamRole:
+    Description: Implicit IAM Role created for get proposal function
+    Value:
+      Fn::GetAtt:
+      - EventportalGetSpeakersRole
       - Arn
