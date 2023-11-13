@@ -13,6 +13,21 @@ app = initialize_app(credential=cred)
 
 
 def lambda_handler(event, context):
+    if event['httpMethod'] == 'OPTIONS':
+        return {
+            "statusCode": 200,
+            "body": json.dumps(
+                {
+                    "status": "success",
+                    "message": "Preflight"
+                }
+            ),
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+            },
+        }
     headers = event['headers']
     if 'Authorization' not in headers:
         return {

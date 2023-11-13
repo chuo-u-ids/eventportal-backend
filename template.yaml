@@ -75,7 +75,7 @@ Resources:
           Type: Api
           Properties:
             Path: /adding_proposal
-            Method: post
+            Method: post, options
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -163,7 +163,7 @@ Resources:
           Type: Api
           Properties:
             Path: /check_user
-            Method: get
+            Method: get, options
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
