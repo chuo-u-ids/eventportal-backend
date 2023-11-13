@@ -5,13 +5,21 @@ Globals:
   Function:
     Timeout: 3
     MemorySize: 128
-  Api:
-    Cors:
-      AllowMethods: "OPTIONS,POST,GET,PUT,DELETE"
-      AllowHeaders: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
-      AllowOrigin: "*"
-      AllowCredentials: "*"
 Resources:
+  Apigate:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: EventportalBackend
+      StageName: Prod
+      Cors:
+        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: .docs/openapi.yml
   ZigLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -66,6 +74,7 @@ Resources:
           Properties:
             Path: /api_work_test
             Method: get
+            RestApiId: !Ref Apigate
     Metadata:
       SamResourceId: EventPortalWorkingTest
   EventportalPostSpeaker:
@@ -82,6 +91,7 @@ Resources:
           Properties:
             Path: /adding_proposal
             Method: post
+            RestApiId: !Ref Apigate
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -104,6 +114,7 @@ Resources:
           Properties:
             Path: /check_proposal/{id}
             Method: get
+            RestApiId: !Ref Apigate
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -126,6 +137,7 @@ Resources:
           Properties:
             Path: /check_proposal_all
             Method: get
+            RestApiId: !Ref Apigate
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -148,6 +160,7 @@ Resources:
           Properties:
             Path: /add_user
             Method: post
+            RestApiId: !Ref Apigate
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -170,6 +183,7 @@ Resources:
           Properties:
             Path: /check_user
             Method: get
+            RestApiId: !Ref Apigate
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -192,6 +206,7 @@ Resources:
           Properties:
             Path: /update_user
             Method: post
+            RestApiId: !Ref Apigate
       Role:
         Fn::GetAtt:
         - EventportalLambdaRole
@@ -223,22 +238,10 @@ Resources:
         WriteCapacityUnits: 1
 
 Outputs:
-  EventportalBackendWorkingApi:
-    Description: API Gateway endpoint URL for Prod stage for check working
+  ApiGatewayRestApi:
+    Description: API Gateway endpoint URL for Prod stage for EventportalBackend function
     Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api_work_test/
-  EventportalPostSpeakerApi:
-    Description: API Gateway endpoint URL for Prod stage for post proposal
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/adding_proposal/
-  EventportalGetSpeakersApi:
-    Description: API Gateway endpoint URL for Prod stage for get proposal
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/check_proposal/{id}/
-  EventportalGetAllSpeakersApi:
-    Description: API Gateway endpoint URL for Prod stage for get all proposal
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/check_proposal_all/
+      Fn::Sub: https://${Apigate}.execute-api.${AWS::Region}.amazonaws.com/Prod/
   EventPortalWorkingTest:
     Description: Lambda Function ARN for check working
     Value:
