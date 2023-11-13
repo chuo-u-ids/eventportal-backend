@@ -73,75 +73,6 @@ paths:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
       security:
         - FirebaseAuthToken: []
-    put:
-      description: '発表申し込みの内容を更新するエンドポイントです。'
-      operationId: 'update_proposal'
-      tags: ['proposal']
-      requestBody:
-        description: '発表申し込みの内容'
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EventSpeechProposalUpdate'
-      responses:
-        '200':
-          description: '200 response'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventSpeechProposalReturn'
-        '400':
-          description: 'リクエストエラー（項目不足など）'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
-        '403':
-          description: 'この発表の変更ができないユーザーです'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
-      x-amazon-apigateway-integration:
-        httpMethod: post
-        type: aws_proxy
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
-      security:
-        - FirebaseAuthToken: []
-  /check_proposal_all:
-    get:
-      description: '発表申し込みの内容すべてを取得するエンドポイント。'
-      operationId: 'check_all_proposal'
-      tags: ['proposal']
-      responses:
-        '200':
-          description: '200 response'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventSpeechProposalAllReturn'
-        '400':
-          description: 'リクエストエラー（項目不足など）'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
-        '403':
-          description: 'この発表の閲覧ができないユーザーです'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
-      x-amazon-apigateway-integration:
-        httpMethod: post
-        type: aws_proxy
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
-      security:
-        - FirebaseAuthToken: []
-
   /check_proposal/{Id}:
     get:
       description: '発表申し込みの内容を確認するエンドポイントです。'
@@ -177,7 +108,38 @@ paths:
         httpMethod: post
         type: aws_proxy
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalGetSpeakers.Arn}/invocations
+      security:
+        - FirebaseAuthToken: []
+  /check_proposal_all:
+    get:
+      description: '発表申し込みの内容すべてを取得するエンドポイント。'
+      operationId: 'check_all_proposal'
+      tags: ['proposal']
+      responses:
+        '200':
+          description: '200 response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalAllReturn'
+        '400':
+          description: 'リクエストエラー（項目不足など）'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+        '403':
+          description: 'この発表の閲覧ができないユーザーです'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSpeechProposalErrorReturn'
+      x-amazon-apigateway-integration:
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalGetAllSpeakers.Arn}/invocations
       security:
         - FirebaseAuthToken: []
   /add_user:
@@ -215,7 +177,7 @@ paths:
         httpMethod: post
         type: aws_proxy
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthenticationAddUser.Arn}/invocations
       security:
         - FirebaseAuthToken: []
   /check_user:
@@ -246,7 +208,7 @@ paths:
         httpMethod: post
         type: aws_proxy
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthenticationCheckUser.Arn}/invocations
       security:
         - FirebaseAuthToken: []
   /update_user:
@@ -284,7 +246,7 @@ paths:
         httpMethod: post
         type: aws_proxy
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventportalPostSpeaker.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthenticationUpdateUser.Arn}/invocations
       security:
         - FirebaseAuthToken: []
 
