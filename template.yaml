@@ -6,6 +6,15 @@ Globals:
     Timeout: 3
     MemorySize: 128
 Resources:
+  ZigLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ZigLayer
+      Description: Zig Layer
+      ContentUri: zig/
+      CompatibleRuntimes:
+        - python3.11
+      RetentionPolicy: Retain
   EventportalLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -71,6 +80,8 @@ Resources:
         Fn::GetAtt:
         - EventportalLambdaRole
         - Arn
+      Layers:
+        - !Ref ZigLayer
     Metadata:
       SamResourceId: EventportalPostSpeaker
   EventportalGetSpeakers:
@@ -91,6 +102,8 @@ Resources:
         Fn::GetAtt:
         - EventportalLambdaRole
         - Arn
+      Layers:
+        - !Ref ZigLayer
     Metadata:
       SamResourceId: EventportalGetSpeakers
   EventportalGetAllSpeakers:
@@ -111,6 +124,8 @@ Resources:
         Fn::GetAtt:
         - EventportalLambdaRole
         - Arn
+      Layers:
+        - !Ref ZigLayer
     Metadata:
       SamResourceId: EventportalGetSpeakers
   AuthenticationAddUser:
@@ -131,6 +146,8 @@ Resources:
         Fn::GetAtt:
         - EventportalLambdaRole
         - Arn
+      Layers:
+        - !Ref ZigLayer
     Metadata:
       SamResourceId: AuthenticationAddUser
   AuthenticationCheckUser:
@@ -151,6 +168,8 @@ Resources:
         Fn::GetAtt:
         - EventportalLambdaRole
         - Arn
+      Layers:
+        - !Ref ZigLayer
     Metadata:
       SamResourceId: AuthenticationCheckUser
   AuthenticationUpdateUser:
@@ -171,6 +190,8 @@ Resources:
         Fn::GetAtt:
         - EventportalLambdaRole
         - Arn
+      Layers:
+        - !Ref ZigLayer
     Metadata:
       SamResourceId: AuthenticationUpdateUser
 

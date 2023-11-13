@@ -1,6 +1,6 @@
 import json
 from boto3 import resource, client
-from zig.classProposal import Proposal, ProposalDb
+from classProposal import Proposal, ProposalDb
 
 
 def lambda_handler(event, context):

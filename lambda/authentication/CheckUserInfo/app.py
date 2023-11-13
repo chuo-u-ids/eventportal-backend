@@ -3,7 +3,7 @@ import json
 from firebase_admin import credentials, initialize_app, auth
 from dotenv import load_dotenv
 from boto3 import resource, client
-from zig.classUserinfo import Userinfo, UserinfoDb
+from classUserinfo import Userinfo, UserinfoDb
 import os
 
 load_dotenv()
