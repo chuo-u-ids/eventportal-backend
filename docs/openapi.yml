@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: eventportal-backend
   description: Eventportal API Spec
-  contact: 
+  contact:
     email: mizphses@gmail.com
   version: 1.0.0
 servers:
@@ -20,7 +20,7 @@ tags:
 paths:
   /api_work_test:
     get:
-      description: "APIの動作確認用のエンドポイントです。"
+      description: 'APIの動作確認用のエンドポイントです。'
       operationId: 'working_test'
       tags: ['test']
       responses:
@@ -37,7 +37,7 @@ paths:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EventPortalWorkingTest.Arn}/invocations
   /adding_proposal:
     post:
-      description: "発表申し込みを行うエンドポイントです。"
+      description: '発表申し込みを行うエンドポイントです。'
       operationId: 'add_proposal'
       tags: ['proposal']
       requestBody:
@@ -74,7 +74,7 @@ paths:
       security:
         - FirebaseAuthToken: []
     put:
-      description: "発表申し込みの内容を更新するエンドポイントです。"
+      description: '発表申し込みの内容を更新するエンドポイントです。'
       operationId: 'update_proposal'
       tags: ['proposal']
       requestBody:
@@ -112,7 +112,7 @@ paths:
         - FirebaseAuthToken: []
   /check_proposal_all:
     get:
-      description: "発表申し込みの内容すべてを取得するエンドポイント。"
+      description: '発表申し込みの内容すべてを取得するエンドポイント。'
       operationId: 'check_all_proposal'
       tags: ['proposal']
       responses:
@@ -144,7 +144,7 @@ paths:
 
   /check_proposal/{Id}:
     get:
-      description: "発表申し込みの内容を確認するエンドポイントです。"
+      description: '発表申し込みの内容を確認するエンドポイントです。'
       operationId: 'check_proposal'
       tags: ['proposal']
       parameters:
@@ -182,7 +182,7 @@ paths:
         - FirebaseAuthToken: []
   /add_user:
     post:
-      description: "ユーザーを追加するエンドポイントです。"
+      description: 'ユーザーを追加するエンドポイントです。'
       operationId: 'add_user'
       tags: ['account']
       requestBody:
@@ -220,7 +220,7 @@ paths:
         - FirebaseAuthToken: []
   /check_user:
     get:
-      description: "ユーザーを確認するエンドポイントです。"
+      description: 'ユーザーを確認するエンドポイントです。'
       operationId: 'check_user'
       tags: ['account']
       responses:
@@ -251,7 +251,7 @@ paths:
         - FirebaseAuthToken: []
   /update_user:
     put:
-      description: "ユーザーを更新するエンドポイントです。"
+      description: 'ユーザーを更新するエンドポイントです。'
       operationId: 'update_user'
       tags: ['account']
       requestBody:
@@ -374,40 +374,43 @@ components:
           type: string
           description: '申し込みのステータス'
         item:
-          type: object
+          type: array
           description: '申し込みの内容'
-          properties:
-            Id:
-              type: string
-              description: '申し込みのID'
-            presentationType:
-              type: string
-              description: '発表形式。presentationまたはposter'
-            title:
-              type: string
-              description: '発表タイトル'
-            speakers:
-              type: array
-              description: '登壇者情報'
-              items:
-                type: object
-                description: '登壇者のeメールアドレス(代表者含む)の配列'
-                properties:
-                  email:
-                    type: string
-                    description: 'eメールアドレス'
-                  name:
-                    type: string
-                    description: '名前'
-            abstract:
-              type: string
-              description: '発表概要'
-            estimated_time:
-              type: integer
-              description: '発表時間(分)'
-            seminar:
-              type: string
-              description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
+          items:
+            type: object
+            description: '申し込みの内容'
+            properties:
+              Id:
+                type: string
+                description: '申し込みのID'
+              presentationType:
+                type: string
+                description: '発表形式。presentationまたはposter'
+              title:
+                type: string
+                description: '発表タイトル'
+              speakers:
+                type: array
+                description: '登壇者情報'
+                items:
+                  type: object
+                  description: '登壇者のeメールアドレス(代表者含む)の配列'
+                  properties:
+                    email:
+                      type: string
+                      description: 'eメールアドレス'
+                    name:
+                      type: string
+                      description: '名前'
+              abstract:
+                type: string
+                description: '発表概要'
+              estimated_time:
+                type: integer
+                description: '発表時間(分)'
+              seminar:
+                type: string
+                description: 'ゼミ名または所属組織 ※運営委員としての発表の場合などはofficial, など例外があります'
     EventSpeechProposalAllReturn:
       title: EventSpeechProposalError Schema
       type: object
@@ -494,7 +497,7 @@ components:
           type: object
           description: 'ユーザーの情報'
           properties:
-            uid: 
+            uid:
               type: string
               description: 'ユーザーID'
             name:

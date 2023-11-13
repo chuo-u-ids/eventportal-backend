@@ -3,6 +3,7 @@ from firebase_admin import credentials, initialize_app, auth
 from dotenv import load_dotenv
 from boto3 import resource, client
 from zig.classProposal import Proposal, ProposalDb
+from zig.classUserinfo import Userinfo, UserinfoDb
 from uuid import uuid4
 import os
 
@@ -35,7 +36,10 @@ def lambda_handler(event, context):
     else:
         token = headers['Authorization']
         decoded_token = auth.verify_id_token(token)
-        email = decoded_token['email']
+        uid = decoded_token['uid']
+        user_db = UserinfoDb(resource('dynamodb', region_name='ap-northeast-1'))
+        user = user_db.get(uid)
+        email = user.email
         if email is None:
             return {
                 "statusCode": 401,

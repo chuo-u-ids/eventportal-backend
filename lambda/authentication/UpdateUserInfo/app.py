@@ -66,14 +66,14 @@ def lambda_handler(event, context):
         body = json.loads(event['body'])
         db = UserinfoDb(resource('dynamodb'))
         user = db.get(body['id']).to_json()['email']
-        user = Userinfo(
-            id=body['id'],
-            email=body['email'],
-            name=body['name'],
-            affiliation=body['affiliation'],
-            department=body['department']
+        user = Userinfo({
+            "uid": decoded_token['uid'],
+            "email": user,
+            "affiliation": body['affiliation'],
+            "department": body['department']
+        }
         )
-        UserinfoDb(resource('dynamodb')).put_userinfo(user)
+        UserinfoDb(resource('dynamodb')).put(user)
         return {
             "statusCode": 200,
             "body": json.dumps(
