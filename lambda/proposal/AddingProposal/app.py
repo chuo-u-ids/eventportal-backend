@@ -8,7 +8,8 @@ from uuid import uuid4
 import os
 
 load_dotenv()
-cred = credentials.Certificate(json.loads("firebase.json"))
+with open("firebase.json") as f:
+    cred = credentials.Certificate(json.load(f))
 app = initialize_app(cred)
 
 
